@@ -4,6 +4,10 @@ function Product(productid, product_name, department, cost, availableQuantity) {
     this.department = department
     this.cost = cost
     this.availableQuantity = availableQuantity
+
+    this.log = function() {
+        console.log(productid + "\t" + product_name + "\t" + department + "\t" + cost + "\t" + availableQuantity)
+    }
 }
 
 module.exports = Product

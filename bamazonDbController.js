@@ -27,6 +27,21 @@ function connectDatabase(callback) {
     });
 }
 
+function fetchProducts(where, callback) {
+    let query = "SELECT * FROM products where " + where
+    connection.query(query, function(err, res) {
+        if (err) {
+            console.log(err)
+            throw err
+        }
+        let prods = []
+        res.forEach(element => {
+            prods.push(new Product(element.productId, element.product_name, element.department_name, element.price, element.stock_quantity)) 
+        });
+        callback(prods)
+    })
+}
+
 function connectAndFectchAvailableProducts(callback) {
     if (!isConnected) {
         connectDatabase(function () {
@@ -39,17 +54,7 @@ function connectAndFectchAvailableProducts(callback) {
 
 function fetchAllAvailableProducts(callback) {
     if (isConnected) {
-        let query = "SELECT * FROM products where stock_quantity > 0"
-        connection.query(query, function(err, res) {
-            if (err) {
-                console.log(err)
-                throw err
-            }
-            res.forEach(element => {
-                products.push(new Product(element.productId, element.product_name, element.department_name, element.price, element.stock_quantity)) 
-            });
-            callback()
-        })
+        fetchProducts("stock_quantity > 0", callback)
     }
 }
 
@@ -78,13 +83,84 @@ function buyProduct(product, quantity, callback) {
     }
 }
 
+function connectAndFectchLowInventory(callback) {
+    products = []
+    if (!isConnected) {
+        connectDatabase(function () {
+            fetchLowInventory(callback)
+        })
+    } else {
+        fetchLowInventory(callback)
+    }
+}
+
+function fetchLowInventory(callback) {
+    if (isConnected) {
+        fetchProducts("stock_quantity <= 50", callback)
+    }
+}
+
+function connectAndUpdateInventory(product,  callback) {
+    if (!isConnected) {
+        connectDatabase(function () {
+            updateInventory(product, callback)
+        })
+    } else {
+        updateInventory(product, callback)
+    }
+}
+
+function updateInventory(product, callback) {
+    let query = "UPDATE `bamazon`.`products` SET `stock_quantity` = '" + product.quantity + "' WHERE (`productId` = '" + product.productid + "');"
+    connection.query(query, function(err, res) {
+        if (err) {
+            console.log(err)
+            throw err
+        }
+        callback()
+    })
+}
+
+function insertNewProduct(product, callback) {
+    //INSERT INTO `bamazon`.`products` (`productId`, `product_name`, `department_name`, `price`) VALUES ('12', 'Banana', 'Deli', '1');
+
+    let query = "INSERT INTO `bamazon`.`products` (`product_name`, `department_name`, `price`, `stock_quantity`) VALUES ('" + product.product_name + "', '" + product.department + "', '" + product.cost + "', '" + product.availableQuantity + "');"
+    connection.query(query, function(err, res) {
+        if (err) {
+            console.log(err)
+            throw err
+        }
+        callback()
+    })
+}
+
+function connectAndFectchAllProducts(callback) {
+    products = []
+    if (!isConnected) {
+        connectDatabase(function () {
+            fetchAllProducts(callback)
+        })
+    } else {
+        fetchAllProducts(callback)
+    }
+}
+
+function fetchAllProducts(callback) {
+    if (isConnected) {
+        fetchProducts("1=1", callback)
+    }
+}
+
 function endConnection() {
     connection.end()
 }
 
 module.exports = {
     connectAndFectchAvailableProducts,
+    connectAndFectchLowInventory,
+    connectAndUpdateInventory,
+    connectAndFectchAllProducts,
     connectAndBuy,
-    products,
+    insertNewProduct,
     endConnection,
 };

@@ -3,13 +3,13 @@ let prod = require("./product")
 let db = require("./bamazonDbController")
 
 function startShopping() {
-    db.connectAndFectchAvailableProducts( function() {
+    db.connectAndFectchAvailableProducts( function(products) {
         inquirer.prompt([
             {
                 name: "product",
                 type: "list",
                 message: "Would what would you like to buy? ",
-                choices: db.products.map((item) => {
+                choices: products.map((item) => {
                     return item.product_name;
                 })
             },
@@ -23,7 +23,7 @@ function startShopping() {
                 }
             }
         ]).then( function(answer) {
-            let product = db.products.find(element => element.product_name == answer.product)
+            let product = products.find(element => element.product_name == answer.product)
             if (product.availableQuantity > parseFloat(answer.quantity)) {
                 db.connectAndBuy(product, answer.quantity, function() {
                     console.log('Transaction success')
