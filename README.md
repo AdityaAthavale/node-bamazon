@@ -32,3 +32,12 @@ If item is not available we will display message 'Insufficient quantity!'
 6) Saying 'Yes' would take you back to shopping.
 
 7) Saying 'No' would kill application.
+
+For Manager: 
+1) Run command: node bamazonManager.js
+
+2) Make your choice with arrow keys.
+
+3) Input the required information as asked.
+
+4) Press Enter after each answer.
